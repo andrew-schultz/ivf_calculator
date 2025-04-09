@@ -50,13 +50,7 @@ class FormulaDictSerializer(serializers.Serializer):
     formula_unexplained_infertility_false_value = serializers.FloatField()
     formula_prior_pregnancies_0_value = serializers.FloatField()
     formula_prior_pregnancies_1_value = serializers.FloatField()
-    formula_prior_pregnancies_2_value = serializers.SerializerMethodField()
+    formula_prior_pregnancies_2_value = serializers.FloatField()
     formula_prior_live_births_0_value = serializers.FloatField()
     formula_prior_live_births_1_value = serializers.FloatField()
-    formula_prior_live_births_2_value = serializers.SerializerMethodField()
-
-    def get_formula_prior_pregnancies_2_value(self, obj):
-        return float(obj['formula_prior_pregnancies_2+_value'])
-    
-    def get_formula_prior_live_births_2_value(self, obj):
-        return float(obj['formula_prior_live_births_2+_value'])
+    formula_prior_live_births_2_value = serializers.FloatField()

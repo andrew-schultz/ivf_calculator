@@ -26,8 +26,7 @@ def get_param_using_own_eggs(param):
 
 
 def get_param_attempted_ivf_previously(param):
-    print('param', param)
-    if param == '0':
+    if param == 0:
         return 'false'
     else:
         return 'true'
@@ -43,11 +42,27 @@ def select_formula(param_using_own_eggs, param_attempted_ivf_previously, param_i
     formula_dict = None
 
     for f in formulas_dict:
-        if (formulas_dict[f]['param_using_own_eggs'].lower() == param_using_own_eggs) and \
-            (formulas_dict[f]['param_attempted_ivf_previously'].lower() == param_attempted_ivf_previously or 'N/A') and \
-            (formulas_dict[f]['param_is_reason_for_infertility_known'].lower() == param_is_reason_for_infertility_known):
-            formula_dict = formulas_dict[f] 
-            break
+        using_own_eggs_match = formulas_dict[f]['param_using_own_eggs'].lower() == param_using_own_eggs
+        prior_ivf_match = formulas_dict[f]['param_attempted_ivf_previously'].lower() == param_attempted_ivf_previously
+        reason_for_infertility_known_match = formulas_dict[f]['param_is_reason_for_infertility_known'].lower() == param_is_reason_for_infertility_known
+
+        # if the user is not using their own eggs then we don't need a match on the prior_ivf params
+        if param_using_own_eggs == 'true':
+            # need all 3 matches
+            if using_own_eggs_match and prior_ivf_match and reason_for_infertility_known_match:
+                formula_dict = formulas_dict[f]
+                print(formula_dict['cdc_formula'])
+                break
+        else:
+            # need only using eggs and reason for infertility known matches
+            if using_own_eggs_match and reason_for_infertility_known_match:
+                formula_dict = formulas_dict[f]
+                print(formula_dict['cdc_formula'])
+                break
+
+    # handle special case of the 2+ fields, serializer doesn't like the '+'
+    formula_dict['formula_prior_pregnancies_2_value'] = formula_dict['formula_prior_pregnancies_2+_value']
+    formula_dict['formula_prior_live_births_2_value'] = formula_dict['formula_prior_live_births_2+_value']
 
     # ensure formula vals are of expected types for math
     serializer = FormulaDictSerializer(data=formula_dict)
@@ -76,11 +91,13 @@ def get_formula_value(key, value, formula):
 
 
 def calculate_score(data):
+    # get vals to determine formula
     using_own_eggs = get_param_using_own_eggs(data.get('use_own_eggs'))
     prior_ivf = get_param_attempted_ivf_previously(data.get('prior_ivf'))
     no_reason = get_param_is_reason_for_infertility_known(data.get('no_reason'))
-    
     formula = select_formula(using_own_eggs, prior_ivf, no_reason)
+
+    # get values derived from selected formula
     formula_intercept = formula['formula_intercept'] 
     age = calc_age(data.get('age'), formula)
     bmi = calc_bmi(data.get('weight'), data.get('height'), formula)
@@ -94,14 +111,6 @@ def calculate_score(data):
     other_reason = get_formula_value('other_reason', data.get('other_reason'), formula)
     prior_pregnancies = get_formula_value('prior_pregnancies', data.get('prior_pregnancies'), formula)
     prior_live_births = get_formula_value('prior_live_births', data.get('live_births'), formula)
-
-    print('formula_intercept', formula_intercept)
-    print('age', age)
-    print('bmi', bmi)
-    print('tubal_factor', tubal_factor)
-    print('male_factor_infertility', male_factor_infertility )
-    print('endometriosis ', endometriosis )
-    print('ovulatory_disorder ', ovulatory_disorder )
 
     score = (
         + formula_intercept

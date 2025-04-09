@@ -32,6 +32,10 @@ const Form = () => {
         'prior_ivf': setPriorIvf,
         'prior_pregnancies': setPriorPregnancies,
         'live_births': setLiveBirths,
+        'use_own_eggs': setUseOwnEggs,
+    }
+
+    const radioSetterFuncMap = {
         'male_factor_infertility': setMaleFactorInfertility,
         'endometriosis': setEndometriosis,
         'tubal_factor': setTubalFactor,
@@ -41,7 +45,6 @@ const Form = () => {
         'other_reason': setOtherReason,
         'unexplained_infertility': setUnexplianedInfertility,
         'no_reason': setNoReason,
-        'use_own_eggs': setUseOwnEggs,
     }
 
 
@@ -56,7 +59,6 @@ const Form = () => {
         if (unexplainedInfertility) {
             resetRadios(false)
             setNoReason(false)
-            // set
         }
     }, [unexplainedInfertility])
 
@@ -64,13 +66,15 @@ const Form = () => {
         if (noReason) {
             resetRadios(false)
             setUnexplianedInfertility(false)
-            // set
         }
     }, [noReason])
 
     useEffect(() => {
-
-    }, [])
+        if (maleFactorInfertility || endometriosis || tubalFactor || ovulatoryDisorder || diminishedOvarianReserve || uterineFactor || otherReason) {
+            setUnexplianedInfertility(false)
+            setNoReason(false)
+        }
+    }, [maleFactorInfertility, endometriosis, tubalFactor, ovulatoryDisorder, diminishedOvarianReserve, uterineFactor, otherReason])
 
     const resetRadios = (val) => {
         setMaleFactorInfertility(val)
@@ -116,6 +120,10 @@ const Form = () => {
             console.log(val)
             val('')
         })
+        Object.values(radioSetterFuncMap).forEach(val => {
+            console.log(val)
+            val(false)
+        })
         setScore('')
     }
 
@@ -127,7 +135,7 @@ const Form = () => {
     }
 
     const handleRadioChange = (e) => {
-        const setter = setterFuncMap[e.target.name]
+        const setter = radioSetterFuncMap[e.target.name]
         const val = e.target.value
         let formatted_val;
         if (val === 'true') {

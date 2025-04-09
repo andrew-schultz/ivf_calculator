@@ -14,7 +14,6 @@ class CalculatorAPIView(APIView):
         serializer = CalculatorRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         valid_data = serializer.validated_data
-        print(valid_data)
         score = calculate_score(valid_data)
 
         return Response({'score': score})
