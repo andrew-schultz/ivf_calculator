@@ -22,6 +22,7 @@ const Form = () => {
     const [unexplainedInfertility, setUnexplianedInfertility] = useState(false)
     const [noReason, setNoReason] = useState(false)
     const [useOwnEggs, setUseOwnEggs] = useState()
+    const [score, setScore] = useState()
 
     const setterFuncMap = {
         'age': setAge,
@@ -51,9 +52,38 @@ const Form = () => {
         setHeight(inches)
     }, [heightFeet, heightInches])
 
+    useEffect(() => {
+        if (unexplainedInfertility) {
+            resetRadios(false)
+            setNoReason(false)
+            // set
+        }
+    }, [unexplainedInfertility])
+
+    useEffect(() => {
+        if (noReason) {
+            resetRadios(false)
+            setUnexplianedInfertility(false)
+            // set
+        }
+    }, [noReason])
+
+    useEffect(() => {
+
+    }, [])
+
+    const resetRadios = (val) => {
+        setMaleFactorInfertility(val)
+        setEndometriosis(val)
+        setTubalFactor(val)
+        setOvulatoryDisorder(val)
+        setDiminishedOvarianReserve(val)
+        setUterineFactor(val)
+        setOtherReason(val)
+    }
+
     const handleSubmit = async () => {
         setLoading(true)
-        console.log('submit')
         const data = {
             'age': age,
             'weight': weight,
@@ -75,7 +105,9 @@ const Form = () => {
 
         const resp = await submitForm(data)
         console.log(resp)
-        // debugger
+        if (resp['score']) {
+            setScore(resp['score'])
+        }
         setLoading(false)
     }
 
@@ -84,12 +116,26 @@ const Form = () => {
             console.log(val)
             val('')
         })
+        setScore('')
     }
 
     const handleInputChange = (e) => {
         const val = e.target.value
+        console.log(e.target.name, val)
         const setter = setterFuncMap[e.target.name]
         setter(val)
+    }
+
+    const handleRadioChange = (e) => {
+        const setter = setterFuncMap[e.target.name]
+        const val = e.target.value
+        let formatted_val;
+        if (val === 'true') {
+            formatted_val = false
+        } else {
+            formatted_val = true
+        }
+        setter(formatted_val)
     }
 
     return(
@@ -203,7 +249,7 @@ const Form = () => {
                         name='male_factor_infertility'
                         value={maleFactorInfertility}
                         checked={maleFactorInfertility}
-                        onChange={handleInputChange}
+                        onClick={handleRadioChange}
                     />
                 </div>
                 <div className='formInputContainer'>
@@ -214,7 +260,7 @@ const Form = () => {
                         name='endometriosis' 
                         value={endometriosis}
                         checked={endometriosis}
-                        onChange={handleInputChange}
+                        onClick={handleRadioChange}
                     />
                 </div>
                 <div className='formInputContainer'>
@@ -225,7 +271,7 @@ const Form = () => {
                         name='tubal_factor' 
                         value={tubalFactor}
                         checked={tubalFactor}
-                        onChange={handleInputChange}
+                        onClick={handleRadioChange}
                     />
                 </div>
                 <div className='formInputContainer'>
@@ -236,7 +282,7 @@ const Form = () => {
                         name='ovulatory_disorder' 
                         value={ovulatoryDisorder}
                         checked={ovulatoryDisorder}
-                        onChange={handleInputChange}
+                        onClick={handleRadioChange}
                     />
                 </div>
                 <div className='formInputContainer'>
@@ -247,7 +293,7 @@ const Form = () => {
                         name='diminished_ovarian_reserve' 
                         value={diminishedOvarianReserve}
                         checked={diminishedOvarianReserve}
-                        onChange={handleInputChange}
+                        onClick={handleRadioChange}
                     />
                 </div>
                 <div className='formInputContainer'>
@@ -258,7 +304,7 @@ const Form = () => {
                         name='uterine_factor' 
                         value={uterineFactor}
                         checked={uterineFactor}
-                        onChange={handleInputChange}
+                        onClick={handleRadioChange}
                     />
                 </div>
                 <div className='formInputContainer'>
@@ -269,7 +315,7 @@ const Form = () => {
                         name='other_reason' 
                         value={otherReason}
                         checked={otherReason}
-                        onChange={handleInputChange}
+                        onClick={handleRadioChange}
                     />
                 </div>
 
@@ -283,7 +329,7 @@ const Form = () => {
                         name='unexplained_infertility' 
                         value={unexplainedInfertility}
                         checked={unexplainedInfertility}
-                        onChange={handleInputChange}
+                        onClick={handleRadioChange}
                     />
                 </div>
 
@@ -297,7 +343,7 @@ const Form = () => {
                         name='no_reason' 
                         value={noReason}
                         checked={noReason}
-                        onChange={handleInputChange}
+                        onClick={handleRadioChange}
                     />
                 </div>
 
@@ -323,6 +369,9 @@ const Form = () => {
                 <div className='formButtonReset' onClick={resetForm}>
                     <p>Start Over</p>
                 </div>
+            </div>
+            <div className='resultsContainer'>
+                <p>{score*100}</p>
             </div>
         </div>
     )

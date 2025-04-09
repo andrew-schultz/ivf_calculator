@@ -21,3 +21,9 @@
 /client/npm-debug.log*
 /client/yarn-debug.log*
 /client/yarn-error.log*
+
+__pycache__
+*__pycache__*
+
+.DS_Store
+*.DS_Store*

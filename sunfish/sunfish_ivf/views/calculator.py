@@ -17,4 +17,4 @@ class CalculatorAPIView(APIView):
         print(valid_data)
         score = calculate_score(valid_data)
 
-        return Response({'success': True})
+        return Response({'score': score})
