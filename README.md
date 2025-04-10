@@ -1,5 +1,10 @@
 To Build and Run:
 
+Prerequisites:
+- have npm installed
+- have python installed
+- have pip installed
+
 1) Clone the repo to your preferred repo.
 2) Build the Frontend by following these commands:
     - `cd client`

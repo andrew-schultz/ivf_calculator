@@ -6,10 +6,6 @@ from sunfish_ivf.services.calculator import calculate_score
 class CalculatorAPIView(APIView):
     authentication_classes = ()
 
-    def get(self, request):
-        # maybe we serve the html from here?
-        return Response()
-
     def post(self, request):
         serializer = CalculatorRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
