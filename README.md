@@ -2,7 +2,7 @@ To Build and Run:
 
 Prerequisites:
 - have npm installed
-- have python installed
+- have python >= 3.9 installed (earlier 3.x versions may work but are untested)
 - have pip installed
 
 1) Clone the repo to your preferred repo.
@@ -13,6 +13,8 @@ Prerequisites:
 3) Navigate to the Backend directory to build and start the app by following these commands from your current location in the terminal:
     - `cd ..`
     - `cd sunfish`
+    - `python -m venv ./venv`
+    - `source ./venv/bin/activate`
     - `pip install -r requirements.txt`
     - `python manage.py migrate`
     - `python manage.py runserver`
