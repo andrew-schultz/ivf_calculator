@@ -1,0 +1,43 @@
+.modalContainer {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    background-color: rgba(0, 0, 0, 0.5);
+    align-items: center;
+    justify-content: center;
+}
+  
+.modalContainerInner {
+    background-color: white;
+    width: 60%;
+    min-width: 300px;
+    min-height: 200px;
+    border-radius: 25px;
+    padding: 50px 50px 10px 50px;
+    position: relative;
+}
+  
+.modalTextHeader {
+    font-size: 2em;
+    margin: 10px;
+}
+  
+.modalTextScore {
+    font-size: 5em;
+    margin: 20px;
+    margin-bottom: 50px;
+}
+  
+.modalCloseText {
+    font-size: .75em;
+    width: 100%;
+}
+
+/* mobile and tablet styling */
+@media (max-width: 880px) {
+    .modalContainerInner {
+        min-width: 0;
+    }
+}

@@ -1,0 +1,172 @@
+.formContainer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px 20px;
+    background-color: #f1f1f1;
+    margin: 10px;
+    border-radius: 25px;
+}
+  
+.formTitle {
+    font-size: 3em;
+    text-align: center;
+    width: 100%;
+    padding: 20px 20px 10px 20px;
+}
+
+.formSection {
+    display: flex;
+    flex-wrap: wrap;
+    width: 45%;
+    min-width: 400px;
+    max-width: 600px;
+    /* border: 1px solid black; */
+    border-radius: 25px;
+    padding: 10px;
+
+    &.right {
+        background-color: #D8D9F5;
+        border: 1px solid #D8D9F5;
+    }
+}
+
+.formSectionHeader {
+    font-size: 2em;
+    font-weight: 500;
+    width: 100%;
+    text-align: center;
+}
+
+.formRadioInputContainer {
+    width: 100%;
+    display: flex;
+    padding: 0px 10px;
+    align-items: center;
+}
+
+.formRadioInput {
+    margin-left: 20px;
+    margin: 0px 5px 0px 20px;
+}
+
+.formInputSubHeader {
+    font-size: 1.35em;
+    margin-bottom: 0px;
+    margin-top: 0px;
+}
+
+.formInputContainer {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    padding: 10px;
+}
+
+.formInputLabel {
+    width: 100%;
+    text-align: start;
+    font-size: 1.25em;
+    padding-bottom: 3px;
+
+    &.radio {
+        font-size: 1.1em;
+        padding-bottom: 0px;
+    }
+}
+
+.formInput {
+    width: 65%;
+    padding: 3px 5px;
+    font-size: 1.1em;
+
+    &.half {
+        width: 20%;
+    }
+
+    &.left {
+        margin-right: 20px;
+    }
+}
+
+.errorText {
+    color: red;
+    font-size: .75em;
+    margin: 3px 0px;
+
+    &.leftMargin {
+        margin-left: 5px;
+    }
+}
+
+.formOrDivider {
+    text-align: center;
+    width: 100%;
+    font-size: 1.25em;
+    font-weight: 500;
+    margin: 10px 0px;
+}
+
+.formButtonsContainer {
+    width: 100%;
+    padding: 10px 20px 20px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+}
+
+.formButtonContainer {
+    width: 49%;
+}
+
+.formButton {
+    border: 1px solid black;
+    border-radius: 20px;
+    cursor: pointer;
+    padding: 5px 10px;
+    display: inline-block;
+    font-weight: 500;
+
+    &.submit {    
+        float: right;
+        background-color: rgb(82, 82, 225);
+        border-color: rgb(82, 82, 225);;
+        color: white;
+    }
+
+    &.reset {
+        float: left;
+    }
+}
+
+.formButtonText {
+    margin: 0px;
+}
+
+/* mobile and tablet styling */
+@media (max-width: 880px) {
+    .formSection {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .formInput {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .formButtonContainer {
+        width: 100%;
+    }
+
+    .formButton {
+        &.submit {
+        float: none;
+        }
+
+        &.reset {
+        float: none;
+        }
+    }
+}

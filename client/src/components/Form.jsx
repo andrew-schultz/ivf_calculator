@@ -2,17 +2,17 @@ import React from "react";
 import { useState, useEffect } from "react";
 import { submitForm } from "../services/api";
 import FormInput from "./FormInput";
+import FormRadioInput from "./FormRadioInput";
 import Modal from "./Modal";
 
 const Form = () => {
-    const [loading, setLoading] = useState(false)
     const [age, setAge] = useState()
     const [weight, setWeight] = useState()
     const [height, setHeight] = useState()
     const [heightFeet, setHeightFeet] = useState()
     const [heightInches, setHeightInches] = useState()
-    const [priorIvf, setPriorIvf] = useState()
-    const [priorPregnancies, setPriorPregnancies] = useState()
+    const [priorIvf, setPriorIvf] = useState('')
+    const [priorPregnancies, setPriorPregnancies] = useState('')
     const [liveBirths, setLiveBirths] = useState(0)
     const [maleFactorInfertility, setMaleFactorInfertility] = useState(false)
     const [endometriosis, setEndometriosis] = useState(false)
@@ -23,7 +23,7 @@ const Form = () => {
     const [otherReason, setOtherReason] = useState(false)
     const [unexplainedInfertility, setUnexplianedInfertility] = useState(false)
     const [noReason, setNoReason] = useState(false)
-    const [useOwnEggs, setUseOwnEggs] = useState()
+    const [useOwnEggs, setUseOwnEggs] = useState('')
     const [score, setScore] = useState()
     const [errors, setErrors] = useState({})
     const [modalOpen, setModalOpen] = useState(false)
@@ -50,7 +50,6 @@ const Form = () => {
         'unexplained_infertility': setUnexplianedInfertility,
         'no_reason': setNoReason,
     }
-
 
     useEffect(() => {
         const hFeet = heightFeet ? heightFeet : 0
@@ -81,12 +80,9 @@ const Form = () => {
     }, [maleFactorInfertility, endometriosis, tubalFactor, ovulatoryDisorder, diminishedOvarianReserve, uterineFactor, otherReason])
 
     useEffect(() => {
-        if (priorPregnancies < 1) {
-            // reset liveBirths to 0 after a user toggles priorPregnancies to None
-            setLiveBirths(0)
-        }
+        // reset liveBirths to 0/None after a user toggles the priorPregnancies select to mimic cdc functionality
+        setLiveBirths(0)
     }, [priorPregnancies])
-
 
     const resetRadios = (val) => {
         setMaleFactorInfertility(val)
@@ -99,7 +95,6 @@ const Form = () => {
     }
 
     const handleSubmit = async () => {
-        setLoading(true)
         setErrors({})
 
         const data = {
@@ -125,6 +120,13 @@ const Form = () => {
 
         if (resp['score']) {
             setScore(resp['score'])
+            
+            // required to display the result modal correctly on smaller screens
+            const windowWidth = window.innerWidth;
+            if (windowWidth <= 880) {
+                window.scrollTo(0, 0)
+                document.body.style.overflow = 'hidden';
+            }
             setModalOpen(true)
         }
         else {
@@ -134,13 +136,11 @@ const Form = () => {
             }
             setErrors(errors)
         }
-        setLoading(false)
     }
 
     const resetForm = () => {
         Object.values(setterFuncMap).forEach(val => {
-            console.log(val)
-            if (val == setLiveBirths) {
+            if (val === setLiveBirths) {
                 // reset live births back to its default of 0
                 setLiveBirths(0)
             } else {
@@ -148,16 +148,14 @@ const Form = () => {
             }
         })
         Object.values(radioSetterFuncMap).forEach(val => {
-            console.log(val)
             val(false)
         })
-        setScore('')
+        setScore()
         setErrors({})
     }
 
     const handleInputChange = (e) => {
         const val = e.target.value
-        console.log(e.target.name, val)
         const setter = setterFuncMap[e.target.name]
         setter(val)
     }
@@ -256,11 +254,11 @@ const Form = () => {
                         value={priorIvf}
                         onChange={handleInputChange}
                     >
-                        <option >Select an option</option>
-                        <option selected={priorIvf == '0' ? true : false} value="0">I've never used IVF</option>
-                        <option selected={priorIvf == '1' ? true : false} value="1">1</option>
-                        <option selected={priorIvf == '2' ? true : false} value="2">2</option>
-                        <option selected={priorIvf == '3' ? true : false} value="3">3 or more</option>
+                        <option disabled={priorIvf !== '' ? true : false}>Select an option</option>
+                        <option selected={priorIvf === '0' ? true : false} value="0">I've never used IVF</option>
+                        <option selected={priorIvf === '1' ? true : false} value="1">1</option>
+                        <option selected={priorIvf === '2' ? true : false} value="2">2</option>
+                        <option selected={priorIvf === '3' ? true : false} value="3">3 or more</option>
                     </select>
                     {errors['prior_ivf'] ? (
                         <p className="errorText leftMargin">Required</p>
@@ -275,10 +273,10 @@ const Form = () => {
                         value={priorPregnancies}
                         onChange={handleInputChange}
                     >
-                        <option >Select an option</option>
-                        <option selected={priorPregnancies == '0' ? true : false} value="0">None</option>
-                        <option selected={priorPregnancies == '1' ? true : false} value="1">1</option>
-                        <option selected={priorPregnancies == '2' ? true : false} value="2">2 or more</option>
+                        <option disabled={priorPregnancies !== '' ? true : false}>Select an option</option>
+                        <option selected={priorPregnancies === '0' ? true : false} value="0">None</option>
+                        <option selected={priorPregnancies === '1' ? true : false} value="1">1</option>
+                        <option selected={priorPregnancies === '2' ? true : false} value="2">2 or more</option>
                     </select>
                     {errors['prior_pregnancies'] ? (
                         <p className="errorText leftMargin">Required</p>
@@ -296,12 +294,15 @@ const Form = () => {
                             value={liveBirths}
                             onChange={handleInputChange}
                         >
-                            <option >Select an option</option>
-                            <option selected={liveBirths == '0' ? true : false} value="0">None</option>
-                            <option selected={liveBirths == '1' ? true : false} value="1">1</option>
-                            {priorPregnancies && priorPregnancies > 1 ? (
-                                <option selected={liveBirths == '2' ? true : false} value="2">2 or more</option>
-                            ) : null }
+                            <option disabled={liveBirths >= 0 ? true : false}>Select an option</option>
+                            <option selected={liveBirths === '0' ? true : false} value="0">None</option>
+                            <option selected={liveBirths === '1' ? true : false} value="1">1</option>
+                            <option 
+                                selected={liveBirths === '2' ? true : false} 
+                                disabled={priorPregnancies && priorPregnancies > 1 ? false : true}
+                                value="2">
+                                2 or more
+                            </option>
                         </select>
                         {errors['live_births'] ? (
                             <p className="errorText leftMargin">Required</p>
@@ -320,111 +321,66 @@ const Form = () => {
                         <p className='errorText'>Required</p>
                     ) : null }
                 </div>
-                <div className='formRadioInputContainer'>    
-                    <input 
-                        className='formRadioInput' 
-                        type='radio' 
-                        name='male_factor_infertility'
-                        value={maleFactorInfertility}
-                        checked={maleFactorInfertility}
-                        onClick={handleRadioChange}
-                    />
-                    <label className='formInputLabel radio'>Male Factor Infertility</label>
-                </div>
-                <div className='formRadioInputContainer'>
-                    <input 
-                        className='formRadioInput' 
-                        type='radio' 
-                        name='endometriosis' 
-                        value={endometriosis}
-                        checked={endometriosis}
-                        onClick={handleRadioChange}
-                    />
-                    <label className='formInputLabel radio'>Endometriosis</label>
-                </div>
-                <div className='formRadioInputContainer'>
-                    <input 
-                        className='formRadioInput' 
-                        type='radio' 
-                        name='tubal_factor' 
-                        value={tubalFactor}
-                        checked={tubalFactor}
-                        onClick={handleRadioChange}
-                    />
-                    <label className='formInputLabel radio'>Tubal Factor</label>
-                </div>
-                <div className='formRadioInputContainer'>
-                    <input 
-                        className='formRadioInput' 
-                        type='radio' 
-                        name='ovulatory_disorder' 
-                        value={ovulatoryDisorder}
-                        checked={ovulatoryDisorder}
-                        onClick={handleRadioChange}
-                    />
-                    <label className='formInputLabel radio'>Ovulatory Disorder</label>
-                </div>
-                <div className='formRadioInputContainer'>
-                    <input 
-                        className='formRadioInput' 
-                        type='radio' 
-                        name='diminished_ovarian_reserve' 
-                        value={diminishedOvarianReserve}
-                        checked={diminishedOvarianReserve}
-                        onClick={handleRadioChange}
-                    />
-                    <label className='formInputLabel radio'>Diminished Ovarian Reserve</label>
-                </div>
-                <div className='formRadioInputContainer'>
-                    <input 
-                        className='formRadioInput' 
-                        type='radio' 
-                        name='uterine_factor' 
-                        value={uterineFactor}
-                        checked={uterineFactor}
-                        onClick={handleRadioChange}
-                    />
-                    <label className='formInputLabel radio'>Uterine Factor</label>
-                </div>
-                <div className='formRadioInputContainer'>
-                    <input 
-                        className='formRadioInput' 
-                        type='radio' 
-                        name='other_reason' 
-                        value={otherReason}
-                        checked={otherReason}
-                        onClick={handleRadioChange}
-                    />
-                    <label className='formInputLabel radio'>Other reason</label>
-                </div>
+                <FormRadioInput 
+                    inputName={'male_factor_infertility'} 
+                    inputVal={maleFactorInfertility}
+                    clickHandler={handleRadioChange}
+                    labelText={'Male Factor Infertility'}
+                />
+                <FormRadioInput 
+                    inputName={'endometriosis'} 
+                    inputVal={endometriosis}
+                    clickHandler={handleRadioChange}
+                    labelText={'Endometriosis'}
+                />
+                <FormRadioInput 
+                    inputName={'tubal_factor'} 
+                    inputVal={tubalFactor}
+                    clickHandler={handleRadioChange}
+                    labelText={'Tubal Factor'}
+                />
+                <FormRadioInput 
+                    inputName={'ovulatory_disorder'} 
+                    inputVal={ovulatoryDisorder}
+                    clickHandler={handleRadioChange}
+                    labelText={'Ovulatory Disorder'}
+                />
+                <FormRadioInput 
+                    inputName={'diminished_ovarian_reserve'} 
+                    inputVal={diminishedOvarianReserve}
+                    clickHandler={handleRadioChange}
+                    labelText={'Diminished Ovarian Reserve'}
+                />
+                <FormRadioInput 
+                    inputName={'uterine_factor'} 
+                    inputVal={uterineFactor}
+                    clickHandler={handleRadioChange}
+                    labelText={'Uterine Factor'}
+                />
+                <FormRadioInput 
+                    inputName={'other_reason'} 
+                    inputVal={otherReason}
+                    clickHandler={handleRadioChange}
+                    labelText={'Other Reason'}
+                />
 
                 <p className='formOrDivider'>(Or)</p>
                 
-                <div className='formRadioInputContainer'>
-                    <input 
-                        className='formRadioInput' 
-                        type='radio' 
-                        name='unexplained_infertility' 
-                        value={unexplainedInfertility}
-                        checked={unexplainedInfertility}
-                        onClick={handleRadioChange}
-                    />
-                    <label className='formInputLabel radio'>Unexplained (Idiopathic) infertility</label>
-                </div>
+                <FormRadioInput 
+                    inputName={'unexplained_infertility'} 
+                    inputVal={unexplainedInfertility}
+                    clickHandler={handleRadioChange}
+                    labelText={'Unexplained (Idiopathic) infertility'}
+                />
 
                 <p className='formOrDivider'>(Or)</p>
                 
-                <div className='formRadioInputContainer'>
-                    <input 
-                        className='formRadioInput' 
-                        type='radio' 
-                        name='no_reason' 
-                        value={noReason}
-                        checked={noReason}
-                        onClick={handleRadioChange}
-                    />
-                    <label className='formInputLabel radio'>I don’t know / no reason</label>
-                </div>
+                <FormRadioInput 
+                    inputName={'no_reason'} 
+                    inputVal={noReason}
+                    clickHandler={handleRadioChange}
+                    labelText={'I don’t know / no reason'}
+                />
 
                 <div className='formInputContainer'>
                     <label className='formInputLabel'>Do you plan to use your own eggs or donor eggs?</label>
@@ -435,9 +391,9 @@ const Form = () => {
                         value={useOwnEggs}
                         onChange={handleInputChange}
                     >
-                        <option >Select an option</option>
-                        <option selected={useOwnEggs == true ? true : false} value="true">My own eggs</option>
-                        <option selected={useOwnEggs == false ? true : false} value="false">Donor eggs</option>
+                        <option disabled={useOwnEggs !== '' ? true : false}>Select an option</option>
+                        <option selected={useOwnEggs === true ? true : false} value="true">My own eggs</option>
+                        <option selected={useOwnEggs === false ? true : false} value="false">Donor eggs</option>
                     </select>
                     {errors['use_own_eggs'] ? (
                         <p className='errorText leftMargin'>Required</p>
@@ -457,9 +413,6 @@ const Form = () => {
                 </div>
             </div>
             {score && modalOpen ? (
-                // <div className='resultsContainer'>
-                //     <p>{score ? score * 100 : ''}</p>
-                // </div>
                 <Modal score={score} toggleModal={setModalOpen}></Modal>
             ): null}
             

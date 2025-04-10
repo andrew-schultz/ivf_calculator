@@ -2,6 +2,7 @@
 
 const Modal = ({score, toggleModal}) => {
     const handleToggle = () => {
+        document.body.style.overflow = 'auto';
         toggleModal(false)
     }
 
