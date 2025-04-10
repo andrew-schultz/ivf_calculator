@@ -13,6 +13,7 @@
     background-color: white;
     width: 60%;
     min-width: 300px;
+    max-width: 750px;
     min-height: 200px;
     border-radius: 25px;
     padding: 50px 50px 10px 50px;
