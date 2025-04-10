@@ -17,11 +17,13 @@ Including another URLconf
 # from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
-from django.urls import include, path
+from django.urls import include, path, re_path
 from sunfish_ivf.urls import calculator_urlpatterns
+from sunfish_ivf.views.client import serve_react
 
 
 urlpatterns = [
     # path('admin/', admin.site.urls),
     path('api/v1/calculator/', include(calculator_urlpatterns)),
+    re_path(r"^(?P<path>.*)$", serve_react, {"document_root": settings.REACT_APP_BUILD_PATH}),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

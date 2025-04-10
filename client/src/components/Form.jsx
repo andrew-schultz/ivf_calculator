@@ -1,6 +1,8 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import { submitForm } from "../services/api";
+import FormInput from "./FormInput";
+import Modal from "./Modal";
 
 const Form = () => {
     const [loading, setLoading] = useState(false)
@@ -11,7 +13,7 @@ const Form = () => {
     const [heightInches, setHeightInches] = useState()
     const [priorIvf, setPriorIvf] = useState()
     const [priorPregnancies, setPriorPregnancies] = useState()
-    const [liveBirths, setLiveBirths] = useState()
+    const [liveBirths, setLiveBirths] = useState(0)
     const [maleFactorInfertility, setMaleFactorInfertility] = useState(false)
     const [endometriosis, setEndometriosis] = useState(false)
     const [tubalFactor, setTubalFactor] = useState(false)
@@ -22,7 +24,9 @@ const Form = () => {
     const [unexplainedInfertility, setUnexplianedInfertility] = useState(false)
     const [noReason, setNoReason] = useState(false)
     const [useOwnEggs, setUseOwnEggs] = useState()
-    const [score, setScore] = useState()
+    const [score, setScore] = useState(0.629876556)
+    const [errors, setErrors] = useState({})
+    const [modalOpen, setModalOpen] = useState(true)
 
     const setterFuncMap = {
         'age': setAge,
@@ -76,6 +80,14 @@ const Form = () => {
         }
     }, [maleFactorInfertility, endometriosis, tubalFactor, ovulatoryDisorder, diminishedOvarianReserve, uterineFactor, otherReason])
 
+    useEffect(() => {
+        if (priorPregnancies < 1) {
+            // reset liveBirths to 0 after a user toggles priorPregnancies to None
+            setLiveBirths(0)
+        }
+    }, [priorPregnancies])
+
+
     const resetRadios = (val) => {
         setMaleFactorInfertility(val)
         setEndometriosis(val)
@@ -88,6 +100,8 @@ const Form = () => {
 
     const handleSubmit = async () => {
         setLoading(true)
+        setErrors({})
+
         const data = {
             'age': age,
             'weight': weight,
@@ -108,9 +122,17 @@ const Form = () => {
         }
 
         const resp = await submitForm(data)
-        console.log(resp)
+
         if (resp['score']) {
             setScore(resp['score'])
+            setModalOpen(true)
+        }
+        else {
+            const errors = resp
+            if (reasonErrors()) {
+                errors['reasonError'] = true
+            }
+            setErrors(errors)
         }
         setLoading(false)
     }
@@ -118,13 +140,19 @@ const Form = () => {
     const resetForm = () => {
         Object.values(setterFuncMap).forEach(val => {
             console.log(val)
-            val('')
+            if (val == setLiveBirths) {
+                // reset live births back to its default of 0
+                setLiveBirths(0)
+            } else {
+                val('')
+            }
         })
         Object.values(radioSetterFuncMap).forEach(val => {
             console.log(val)
             val(false)
         })
         setScore('')
+        setErrors({})
     }
 
     const handleInputChange = (e) => {
@@ -146,55 +174,81 @@ const Form = () => {
         setter(formatted_val)
     }
 
+    const reasonErrors = () => {
+        // any 1 "radioReason" being true is enough for this group to pass
+        const radioReasons = (
+            maleFactorInfertility ||
+            endometriosis ||
+            tubalFactor ||
+            ovulatoryDisorder ||
+            diminishedOvarianReserve ||
+            uterineFactor ||
+            otherReason
+        )
+        
+        // 1 of radioReasons, noReason, or unexplainedInfertility must be true
+        if (radioReasons || noReason || unexplainedInfertility) {
+            return false
+        }
+
+        return true
+    }
+
     return(
         <div className='formContainer'>
+            <div className='formTitle'>
+                IVF Success Calculator
+            </div>
             <div className='formSection'>
                 <div className='formSectionHeader'>
                     Background and History
                 </div>
+                <FormInput
+                    labelText={'How old are you?'}
+                    inputType={'number'}
+                    inputName={'age'}
+                    placeholderText={'Enter age between 20 and 50 years'}
+                    inputVal={age}
+                    onChangeHandler={handleInputChange}
+                    errorText={`Input is outside of range needed for estimation.\nPlease enter an age between 20 and 50 years.`}
+                    showError={errors['age']}
+                    minVal={20}
+                    maxVal={50}
+                />
+                <FormInput
+                    labelText={'How much do you weigh?'}
+                    inputType={'number'}
+                    inputName={'weight'}
+                    placeholderText={'Enter weight between 80-300 lbs'}
+                    inputVal={weight}
+                    onChangeHandler={handleInputChange}
+                    errorText={`Input is outside of range needed for estimation.\nPlease enter a weight between 80 and 300 lbs.`}
+                    showError={errors['weight']}
+                    minVal={80}
+                    maxVal={300}
+                />
                 <div className='formInputContainer'>
-                    <label className='formInputLabel' for='age'>How old are you?</label>
+                    <label className='formInputLabel'>How tall are you?</label>
                     <input 
-                        className='formInput'
-                        type='number'
-                        name='age'
-                        placeholder='Enter age between 20 and 50 years'
-                        min='20'
-                        max='50'
-                        value={age} 
-                        onChange={handleInputChange} />
-                </div>
-                <div className='formInputContainer'>
-                    <label className='formInputLabel' for='weight'>How much do you weigh?</label>
-                    <input 
-                        className='formInput' 
-                        type='number' 
-                        name='weight' 
-                        placeholder='Enter weight between 80-300 lbs'
-                        min='80'
-                        max='300'
-                        value={weight} 
-                        onChange={handleInputChange} />
-                </div>
-                <div className='formInputContainer'>
-                    <label className='formInputLabel' for='height'>How tall are you?</label>
-                    <input 
-                        className='formInput' 
+                        className='formInput half left' 
                         type='number' 
                         name='height_feet' 
                         placeholder='feet' 
                         value={heightFeet}
                         onChange={handleInputChange} />
                     <input 
-                        className='formInput' 
+                        className='formInput half' 
                         type='number' 
                         name='height_inches' 
                         placeholder='inches' 
                         value={heightInches}
                         onChange={handleInputChange} />
+                    {errors['height'] ? (
+                        <p className="errorText">Required - Input is outside of range needed for estimation.</p>
+                    ) : null}
                 </div>
                 <div className='formInputContainer'>
-                    <label className='formInputLabel' for='prior_ivf'>How many times have you used IVF in the past (include all cycles, even those not resulting in pregnancy)?</label>
+                    <label className='formInputLabel'>How many times have you used IVF in the past (include all cycles, even those not resulting in pregnancy)?</label>
                     <select 
                         className='formInput dropdown' 
                         name='prior_ivf' 
@@ -208,9 +262,12 @@ const Form = () => {
                         <option selected={priorIvf == '2' ? true : false} value="2">2</option>
                         <option selected={priorIvf == '3' ? true : false} value="3">3 or more</option>
                     </select>
+                    {errors['prior_ivf'] ? (
+                        <p className="errorText leftMargin">Required</p>
+                    ) : null}
                 </div>
                 <div className='formInputContainer'>
-                    <label className='formInputLabel' for='prior_pregnancies'>How many prior pregnancies have you had?</label>
+                    <label className='formInputLabel'>How many prior pregnancies have you had?</label>
                     <select 
                         className='formInput dropdown' 
                         name='prior_pregnancies' 
@@ -223,140 +280,154 @@ const Form = () => {
                         <option selected={priorPregnancies == '1' ? true : false} value="1">1</option>
                         <option selected={priorPregnancies == '2' ? true : false} value="2">2 or more</option>
                     </select>
+                    {errors['prior_pregnancies'] ? (
+                        <p className="errorText leftMargin">Required</p>
+                    ) : null}
                 </div>
                 
-                <div className='formInputContainer'>
-                    {/* hidden unless the value of the prior_pregnancies select is 1 or 2, then its visible and required */}
-                    <label className='formInputLabel' for='live_births'>How many prior births have you had?</label>
-                    <select 
-                        className='formInput dropdown' 
-                        name='live_births' 
-                        placeholder='Select an option'
-                        value={liveBirths}
-                        onChange={handleInputChange}
-                    >
-                        <option >Select an option</option>
-                        <option selected={liveBirths == '0' ? true : false} value="0">None</option>
-                        <option selected={liveBirths == '1' ? true : false} value="1">1</option>
-                        <option selected={liveBirths == '2' ? true : false} value="2">2 or more</option>
-                    </select>
-                </div>
+                {priorPregnancies && priorPregnancies > 0 ? (
+                    <div className='formInputContainer'>
+                        {/* hidden unless the value of the prior_pregnancies select is 1 or 2, then its visible and required */}
+                        <label className='formInputLabel'>How many prior births have you had?</label>
+                        <select 
+                            className='formInput dropdown' 
+                            name='live_births' 
+                            placeholder='Select an option'
+                            value={liveBirths}
+                            onChange={handleInputChange}
+                        >
+                            <option >Select an option</option>
+                            <option selected={liveBirths == '0' ? true : false} value="0">None</option>
+                            <option selected={liveBirths == '1' ? true : false} value="1">1</option>
+                            {priorPregnancies && priorPregnancies > 1 ? (
+                                <option selected={liveBirths == '2' ? true : false} value="2">2 or more</option>
+                            ) : null }
+                        </select>
+                        {errors['live_births'] ? (
+                            <p className="errorText leftMargin">Required</p>
+                        ) : null}
+                    </div>
+                ) : null}
             </div>
-            <div className='formSection'>
+
+            <div className='formSection right'>
                 <div className='formSectionHeader'>
                     Diagnosis and Plan
                 </div>
                 <div className='formInputContainer'>
-                    <p>What is the reason you are using IVF? (select all that apply)</p>
+                    <p className='formInputSubHeader'>What is the reason you are using IVF? (select all that apply)</p>
+                    {errors['reasonError'] || errors['reason_error'] ? (
+                        <p className='errorText'>Required</p>
+                    ) : null }
                 </div>
-                <div className='formInputContainer'>    
-                    <label className='formInputLabel' for='male_factor_infertility'>Male Factor Infertility</label>
+                <div className='formRadioInputContainer'>    
                     <input 
-                        className='formInput' 
+                        className='formRadioInput' 
                         type='radio' 
                         name='male_factor_infertility'
                         value={maleFactorInfertility}
                         checked={maleFactorInfertility}
                         onClick={handleRadioChange}
                     />
+                    <label className='formInputLabel radio'>Male Factor Infertility</label>
                 </div>
-                <div className='formInputContainer'>
-                    <label className='formInputLabel' for='endometriosis'>Endometriosis</label>
+                <div className='formRadioInputContainer'>
                     <input 
-                        className='formInput' 
+                        className='formRadioInput' 
                         type='radio' 
                         name='endometriosis' 
                         value={endometriosis}
                         checked={endometriosis}
                         onClick={handleRadioChange}
                     />
+                    <label className='formInputLabel radio'>Endometriosis</label>
                 </div>
-                <div className='formInputContainer'>
-                    <label className='formInputLabel' for='tubal_factor'>Tubal Factor</label>
+                <div className='formRadioInputContainer'>
                     <input 
-                        className='formInput' 
+                        className='formRadioInput' 
                         type='radio' 
                         name='tubal_factor' 
                         value={tubalFactor}
                         checked={tubalFactor}
                         onClick={handleRadioChange}
                     />
+                    <label className='formInputLabel radio'>Tubal Factor</label>
                 </div>
-                <div className='formInputContainer'>
-                    <label className='formInputLabel' for='ovulatory_disorder'>Ovulatory Disorder</label>
+                <div className='formRadioInputContainer'>
                     <input 
-                        className='formInput' 
+                        className='formRadioInput' 
                         type='radio' 
                         name='ovulatory_disorder' 
                         value={ovulatoryDisorder}
                         checked={ovulatoryDisorder}
                         onClick={handleRadioChange}
                     />
+                    <label className='formInputLabel radio'>Ovulatory Disorder</label>
                 </div>
-                <div className='formInputContainer'>
-                    <label className='formInputLabel' for='diminished_ovarian_reserve'>Diminished Ovarian Reserve</label>
+                <div className='formRadioInputContainer'>
                     <input 
-                        className='formInput' 
+                        className='formRadioInput' 
                         type='radio' 
                         name='diminished_ovarian_reserve' 
                         value={diminishedOvarianReserve}
                         checked={diminishedOvarianReserve}
                         onClick={handleRadioChange}
                     />
+                    <label className='formInputLabel radio'>Diminished Ovarian Reserve</label>
                 </div>
-                <div className='formInputContainer'>
-                    <label className='formInputLabel' for='uterine_factor'>Uterine Factor</label>
+                <div className='formRadioInputContainer'>
                     <input 
-                        className='formInput' 
+                        className='formRadioInput' 
                         type='radio' 
                         name='uterine_factor' 
                         value={uterineFactor}
                         checked={uterineFactor}
                         onClick={handleRadioChange}
                     />
+                    <label className='formInputLabel radio'>Uterine Factor</label>
                 </div>
-                <div className='formInputContainer'>
-                    <label className='formInputLabel' for='other_reason'>Other reason</label>
+                <div className='formRadioInputContainer'>
                     <input 
-                        className='formInput' 
+                        className='formRadioInput' 
                         type='radio' 
                         name='other_reason' 
                         value={otherReason}
                         checked={otherReason}
                         onClick={handleRadioChange}
                     />
+                    <label className='formInputLabel radio'>Other reason</label>
                 </div>
 
-                <p>(OR)</p>
+                <p className='formOrDivider'>(Or)</p>
                 
-                <div className='formInputContainer'>
-                    <label className='formInputLabel' for='unexplained_infertility'>Unexplained (Idiopathic) infertility</label>
+                <div className='formRadioInputContainer'>
                     <input 
-                        className='formInput' 
+                        className='formRadioInput' 
                         type='radio' 
                         name='unexplained_infertility' 
                         value={unexplainedInfertility}
                         checked={unexplainedInfertility}
                         onClick={handleRadioChange}
                     />
+                    <label className='formInputLabel radio'>Unexplained (Idiopathic) infertility</label>
                 </div>
 
-                <p>(OR)</p>
+                <p className='formOrDivider'>(Or)</p>
                 
-                <div className='formInputContainer'>
-                    <label className='formInputLabel' for='no_reason'>I don’t know/no reason</label>
+                <div className='formRadioInputContainer'>
                     <input 
-                        className='formInput' 
+                        className='formRadioInput' 
                         type='radio' 
                         name='no_reason' 
                         value={noReason}
                         checked={noReason}
                         onClick={handleRadioChange}
                     />
+                    <label className='formInputLabel radio'>I don’t know / no reason</label>
                 </div>
 
                 <div className='formInputContainer'>
-                    <label className='formInputLabel' for='use_own_eggs'>Do you plan to use your own eggs or donor eggs?</label>
+                    <label className='formInputLabel'>Do you plan to use your own eggs or donor eggs?</label>
                     <select 
                         className='formInput dropdown' 
                         name='use_own_eggs' 
@@ -368,19 +439,30 @@ const Form = () => {
                         <option selected={useOwnEggs == true ? true : false} value="true">My own eggs</option>
                         <option selected={useOwnEggs == false ? true : false} value="false">Donor eggs</option>
                     </select>
+                    {errors['use_own_eggs'] ? (
+                        <p className='errorText leftMargin'>Required</p>
+                    ) : null}
                 </div>
             </div>
             <div className='formButtonsContainer'>
-                <div className='formButtonSubmit' onClick={handleSubmit}>
-                    <p>Calculate Success</p>
+                <div className='formButtonContainer'>
+                    <div className='formButton submit' onClick={handleSubmit}>
+                        <p className='formButtonText'>Calculate Success</p>
+                    </div>
                 </div>
-                <div className='formButtonReset' onClick={resetForm}>
-                    <p>Start Over</p>
+                <div className='formButtonContainer'>
+                    <div className='formButton reset' onClick={resetForm}>
+                        <p className='formButtonText'>Start Over</p>
+                    </div>
                 </div>
             </div>
-            <div className='resultsContainer'>
-                <p>{score*100}</p>
-            </div>
+            {score && modalOpen ? (
+                // <div className='resultsContainer'>
+                //     <p>{score ? score * 100 : ''}</p>
+                // </div>
+                <Modal score={score} toggleModal={setModalOpen}></Modal>
+            ): null}
+            
         </div>
     )
 }
