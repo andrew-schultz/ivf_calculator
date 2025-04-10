@@ -15,8 +15,8 @@ Prerequisites:
     - `cd sunfish`
     - `pip install -r requirements.txt`
     - `python manage.py migrate`
-    - `python mange.py runserver`
-4) Access the app at `localhost:8000`
+    - `python manage.py runserver`
+4) Access the app in a browser at `localhost:8000`
 
 To update frontend code:
 1) Navigate to the `client` directory
