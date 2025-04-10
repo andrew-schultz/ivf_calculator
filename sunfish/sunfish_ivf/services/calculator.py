@@ -112,13 +112,11 @@ def select_formula(param_using_own_eggs, param_attempted_ivf_previously, param_i
             # need all 3 matches
             if using_own_eggs_match and prior_ivf_match and reason_for_infertility_known_match:
                 formula_dict = formulas_dict[f]
-                print(formula_dict['cdc_formula'])
                 break
         else:
             # need only using eggs and reason for infertility known matches
             if using_own_eggs_match and reason_for_infertility_known_match:
                 formula_dict = formulas_dict[f]
-                print(formula_dict['cdc_formula'])
                 break
 
     # handle special case of the 2+ fields, serializer doesn't like the '+'
