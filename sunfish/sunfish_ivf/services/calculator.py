@@ -6,7 +6,7 @@ from sunfish_ivf.serializers.calculator import FormulaDictSerializer
 
 
 def parse_csv():
-    csv_filepath = os.path.join(settings.BASE_DIR, 'static', 'ivf_success_formulas.csv')
+    csv_filepath = os.path.join(settings.BASE_DIR, 'static_django', 'ivf_success_formulas.csv')
     formula_dict = {}
 
     with open(csv_filepath, 'r') as file:

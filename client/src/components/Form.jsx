@@ -24,9 +24,9 @@ const Form = () => {
     const [unexplainedInfertility, setUnexplianedInfertility] = useState(false)
     const [noReason, setNoReason] = useState(false)
     const [useOwnEggs, setUseOwnEggs] = useState()
-    const [score, setScore] = useState(0.629876556)
+    const [score, setScore] = useState()
     const [errors, setErrors] = useState({})
-    const [modalOpen, setModalOpen] = useState(true)
+    const [modalOpen, setModalOpen] = useState(false)
 
     const setterFuncMap = {
         'age': setAge,
